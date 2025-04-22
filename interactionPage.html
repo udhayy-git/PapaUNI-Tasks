@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExploreHub - Dynamic Experience</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f0f2f5;
+      color: #333;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    header {
+      background-color: #007bff;
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    nav .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    nav input {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 4px;
+      width: 200px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease-in;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    body.dark .card {
+      background: #2a2a2a;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .card-header {
+      padding: 1rem;
+      background: linear-gradient(135deg, #6b7280, #9ca3af);
+      color: white;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff6200;
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+
+    .progress {
+      height: 10px;
+      background: #28a745;
+      width: 0;
+      transition: width 0.3s;
+    }
+
+    .like-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .like-btn.liked {
+      color: #ff4444;
+    }
+
+    .comment-section {
+      margin-top: 1rem;
+    }
+
+    .comment-section textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+
+    .comment-section button {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .explore-btn {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #ff6200;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .stories-container {
+      margin: 2rem 0;
+      padding: 1rem;
+      background: #e9ecef;
+      border-radius: 8px;
+    }
+
+    body.dark .stories-container {
+      background: #333;
+    }
+
+    .stories-carousel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .story-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease-in;
+      cursor: pointer;
+    }
+
+    body.dark .story-card {
+      background: #2a2a2a;
+    }
+
+    .story-card:hover {
+      transform: scale(1.05);
+    }
+
+    .story-header {
+      padding: 1rem;
+      background: linear-gradient(135deg, #4b5563, #6b7280);
+      color: white;
+      text-align: center;
+      position: relative;
+    }
+
+    .modal, .mini-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal-content, .mini-modal-content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+    }
+
+    .mini-modal-content {
+      max-width: 300px;
+    }
+
+    body.dark .modal-content, body.dark .mini-modal-content {
+      background: #2a2a2a;
+    }
+
+    .modal-close, .mini-modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .modal-actions {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .save-story-btn, .share-story-btn, .cta-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .save-story-btn {
+      background: #28a745;
+    }
+
+    .save-story-btn.saved {
+      background: #218838;
+    }
+
+    .share-story-btn {
+      background: #007bff;
+    }
+
+    .cta-btn {
+      background: #ff6200;
+    }
+
+    .quiz-section {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    body.dark .quiz-section {
+      background: #2a2a2a;
+    }
+
+    .quiz-section h2 {
+      margin-bottom: 1rem;
+    }
+
+    .quiz-option {
+      display: block;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    body.dark .quiz-option {
+      background: #444;
+      border-color: #555;
+    }
+
+    .quiz-option:hover {
+      background: #e9ecef;
+    }
+
+    body.dark .quiz-option:hover {
+      background: #555;
+    }
+
+    .quiz-result {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      nav input {
+        width: 150px;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stories-carousel {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">ExploreHub</div>
+      <input type="text" id="searchBar" placeholder="Search content...">
+      <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+    </nav>
+  </header>
+  <main>
+    <section class="card-grid">
+      <div class="card" data-card="1">
+        <div class="card-header">
+          <h3><i class="fas fa-water"></i> Hidden Waterfalls</h3>
+          <span class="badge" data-badge="1">Local!</span>
+        </div>
+        <div class="card-content">
+          <p>Discover nearby waterfalls for a refreshing hike.</p>
+          <div class="progress-bar">
+            <div class="progress" data-progress="1"></div>
+          </div>
+          <button class="like-btn" aria-label="Like">❤️</button>
+          <div class="comment-section">
+            <textarea placeholder="Add a comment..."></textarea>
+            <button>Post</button>
+          </div>
+          <button class="explore-btn" aria-label="Explore now">Explore Now</button>
+        </div>
+      </div>
+      <div class="card" data-card="2">
+        <div class="card-header">
+          <h3><i class="fas fa-laptop"></i> Tech Trends</h3>
+          <span class="badge" data-badge="2">New!</span>
+        </div>
+        <div class="card-content">
+          <p>Stay updated with cutting-edge gadgets.</p>
+          <div class="progress-bar">
+            <div class="progress" data-progress="2"></div>
+          </div>
+          <button class="like-btn" aria-label="Like">❤️</button>
+          <div class="comment-section">
+            <textarea placeholder="Add a comment..."></textarea>
+            <button>Post</button>
+          </div>
+          <button class="explore-btn" aria-label="Explore now">Explore Now</button>
+        </div>
+      </div>
+      <div class="card" data-card="3">
+        <div class="card-header">
+          <h3><i class="fas fa-pray"></i> Cultural Vibes</h3>
+          <span class="badge" data-badge="3">Festive!</span>
+        </div>
+        <div class="card-content">
+          <p>Join vibrant temple festivals in your hometown.</p>
+          <div class="progress-bar">
+            <div class="progress" data-progress="3"></div>
+          </div>
+          <button class="like-btn" aria-label="Like">❤️</button>
+          <div class="comment-section">
+            <textarea placeholder="Add a comment..."></textarea>
+            <button>Post</button>
+          </div>
+          <button class="explore-btn" aria-label="Explore now">Explore Now</button>
+        </div>
+      </div>
+    </section>
+    <section class="stories-container">
+      <h2>Featured Stories</h2>
+      <div class="stories-carousel">
+        <div class="story-card" data-story="1">
+          <div class="story-header">
+            <h4><i class="fas fa-water"></i> Hidden Waterfalls</h4>
+            <span class="badge" data-badge="4">Explore!</span>
+          </div>
+          <div class="card-content">
+            <p>Find a hidden gem for your next adventure.</p>
+          </div>
+        </div>
+        <div class="story-card" data-story="2">
+          <div class="story-header">
+            <h4><i class="fas fa-laptop"></i> Tech Breakthroughs</h4>
+            <span class="badge" data-badge="5">Innovate!</span>
+          </div>
+          <div class="card-content">
+            <p>Discover the next big thing in tech.</p>
+          </div>
+        </div>
+        <div class="story-card" data-story="3">
+          <div class="story-header">
+            <h4><i class="fas fa-pray"></i> Festival Colors</h4>
+            <span class="badge" data-badge="6">Celebrate!</span>
+          </div>
+          <div class="card-content">
+            <p>Celebrate local temple traditions.</p>
+          </div>
+        </div>
+        <div class="story-card" data-story="4">
+          <div class="story-header">
+            <h4><i class="fas fa-star"></i> Space Mysteries</h4>
+            <span class="badge" data-badge="7">Discover!</span>
+          </div>
+          <div class="card-content">
+            <p>Uncover cosmic wonders nearby.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="modal" id="storyModal">
+      <div class="modal-content">
+        <button class="modal-close" aria-label="Close modal">✖</button>
+        <h3 id="modalTitle"></h3>
+        <p id="modalDescription"></p>
+        <div class="modal-actions">
+          <button class="save-story-btn" aria-label="Save story">Save Story</button>
+          <button class="share-story-btn" aria-label="Share story">Share Story</button>
+          <button class="cta-btn" aria-label="Call to action"></button>
+        </div>
+      </div>
+    </div>
+    <div class="mini-modal" id="badgeModal">
+      <div class="mini-modal-content">
+        <button class="mini-modal-close" aria-label="Close modal">✖</button>
+        <p id="badgeFact"></p>
+      </div>
+    </div>
+    <section class="quiz-section">
+      <h2>Quick Quiz</h2>
+      <p>Which planet is known as the Red Planet?</p>
+      <button class="quiz-option" data-answer="Mars">Mars</button>
+      <button class="quiz-option" data-answer="Jupiter">Jupiter</button>
+      <button class="quiz-option" data-answer="Venus">Venus</button>
+      <button class="quiz-option" data-answer="Mercury">Mercury</button>
+      <div class="quiz-result"></div>
+    </section>
+  </main>
+  <script>
+    // Debug Logging
+    console.log('ExploreHub: Script loaded at ' + new Date().toISOString());
+
+    // Search Bar Functionality
+    const searchBar = document.getElementById('searchBar');
+    if (searchBar) {
+      searchBar.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+          const title = card.querySelector('h3').textContent.toLowerCase();
+          card.style.display = title.includes(query) ? 'block' : 'none';
+        });
+        console.log('Search query:', query);
+      });
+    } else {
+      console.error('Search bar not found');
+    }
+
+    // Theme Toggle
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        themeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+        console.log('Theme toggled:', document.body.classList.contains('dark') ? 'Dark' : 'Light');
+      });
+    } else {
+      console.error('Theme toggle button not found');
+    }
+
+    // Like Button
+    document.querySelectorAll('.like-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('liked');
+        console.log('Like button clicked:', btn.closest('.card')?.querySelector('h3').textContent, btn.classList.contains('liked') ? 'Liked' : 'Unliked');
+      });
+    });
+
+    // Comment Posting
+    document.querySelectorAll('.comment-section button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const textarea = btn.previousElementSibling;
+        if (textarea && textarea.value.trim()) {
+          alert('Comment posted: ' + textarea.value);
+          textarea.value = '';
+          console.log('Comment posted for:', btn.closest('.card')?.querySelector('h3').textContent);
+        } else {
+          console.warn('Comment textarea empty or not found');
+        }
+      });
+    });
+
+    // Explore Button
+    document.querySelectorAll('.explore-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.card');
+        const title = card.querySelector('h3').textContent;
+        alert(`Explore ${title} now! (Redirect to details page)`);
+        console.log(`Explore button clicked for: ${title}`);
+      });
+    });
+
+    // Progress Bar
+    document.querySelectorAll('.progress-bar').forEach(bar => {
+      bar.addEventListener('click', () => {
+        const progress = bar.querySelector('.progress');
+        let width = parseInt(progress.style.width) || 0;
+        width = Math.min(width + 20, 100);
+        progress.style.width = `${width}%`;
+        console.log(`Progress updated for card: ${bar.closest('.card')?.querySelector('h3').textContent}, ${width}%`);
+      });
+    });
+
+    // Modal Functionality
+    const modal = document.getElementById('storyModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDescription = document.getElementById('modalDescription');
+    const modalClose = document.querySelector('.modal-close');
+    const saveStoryBtn = document.querySelector('.save-story-btn');
+    const shareStoryBtn = document.querySelector('.share-story-btn');
+    const ctaBtn = document.querySelector('.cta-btn');
+
+    // Mini Modal for Badges
+    const miniModal = document.getElementById('badgeModal');
+    const badgeFact = document.getElementById('badgeFact');
+    const miniModalClose = document.querySelector('.mini-modal-close');
+
+    const cards = {
+      1: {
+        title: 'Hidden Waterfalls',
+        description: 'Plan a hike to tranquil waterfalls near your hometown for a refreshing escape.',
+        cta: 'Plan a Visit'
+      },
+      2: {
+        title: 'Tech Trends',
+        description: 'Discover the latest gadgets at local tech expos or online webinars.',
+        cta: 'Learn More'
+      },
+      3: {
+        title: 'Cultural Vibes',
+        description: 'Join vibrant temple festivals in your hometown to celebrate local traditions.',
+        cta: 'Plan a Visit'
+      }
+    };
+
+    const stories = {
+      1: {
+        title: 'Hidden Waterfalls',
+        description: 'Explore hidden waterfalls in nearby forests for a peaceful hike.',
+        cta: 'Plan a Visit'
+      },
+      2: {
+        title: 'Tech Breakthroughs',
+        description: 'Learn about cutting-edge tech at local events or online.',
+        cta: 'Learn More'
+      },
+      3: {
+        title: 'Festival Colors',
+        description: 'Celebrate your hometown’s temple festivals with vibrant traditions.',
+        cta: 'Plan a Visit'
+      },
+      4: {
+        title: 'Space Mysteries',
+        description: 'Visit a planetarium to uncover cosmic wonders.',
+        cta: 'Learn More'
+      }
+    };
+
+    const badges = {
+      1: 'Did you know? Some local waterfalls are only a short drive from your hometown!',
+      2: 'Tech Tip: Check out the latest AI gadgets at nearby expos!',
+      3: 'Fun Fact: Your hometown’s temple festivals date back over 100 years!',
+      4: 'Explore Tip: Pack a picnic for your waterfall hike!',
+      5: 'Innovation Alert: New tech is unveiled monthly!',
+      6: 'Celebrate: Temple festivals bring your community together!',
+      7: 'Cosmic Fact: Local planetariums host stargazing nights!'
+    };
+
+    // Card Modal
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.classList.contains('badge') || e.target.classList.contains('progress-bar') || e.target.classList.contains('progress')) return;
+        const cardId = card.getAttribute('data-card');
+        const cardData = cards[cardId];
+        if (cardData) {
+          modalTitle.textContent = cardData.title;
+          modalDescription.textContent = cardData.description;
+          ctaBtn.textContent = cardData.cta;
+          saveStoryBtn.classList.remove('saved');
+          modal.style.display = 'flex';
+          console.log(`Modal opened for card: ${cardData.title} (ID: ${cardId})`);
+        } else {
+          console.error(`Card not found for ID: ${cardId}`);
+          alert('Sorry, this content is unavailable.');
+        }
+      });
+    });
+
+    // Story Modal
+    document.querySelectorAll('.story-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.classList.contains('badge')) return;
+        const storyId = card.getAttribute('data-story');
+        const story = stories[storyId];
+        if (story) {
+          modalTitle.textContent = story.title;
+          modalDescription.textContent = story.description;
+          ctaBtn.textContent = story.cta;
+          saveStoryBtn.classList.remove('saved');
+          modal.style.display = 'flex';
+          console.log(`Modal opened for story: ${story.title} (ID: ${storyId})`);
+        } else {
+          console.error(`Story not found for ID: ${storyId}`);
+          alert('Sorry, this story is unavailable.');
+        }
+      });
+    });
+
+    // Badge Mini Modal
+    document.querySelectorAll('.badge').forEach(badge => {
+      badge.addEventListener('click', () => {
+        const badgeId = badge.getAttribute('data-badge');
+        const fact = badges[badgeId];
+        if (fact) {
+          badgeFact.textContent = fact;
+          miniModal.style.display = 'flex';
+          console.log(`Mini modal opened for badge ID: ${badgeId}`);
+        } else {
+          console.error(`Badge fact not found for ID: ${badgeId}`);
+        }
+      });
+    });
+
+    if (modalClose) {
+      modalClose.addEventListener('click', () => {
+        modal.style.display = 'none';
+        console.log('Modal closed');
+      });
+    } else {
+      console.error('Modal close button not found');
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+          console.log('Modal closed via background click');
+        }
+      });
+    } else {
+      console.error('Modal not found');
+    }
+
+    if (miniModalClose) {
+      miniModalClose.addEventListener('click', () => {
+        miniModal.style.display = 'none';
+        console.log('Mini modal closed');
+      });
+    } else {
+      console.error('Mini modal close button not found');
+    }
+
+    if (miniModal) {
+      miniModal.addEventListener('click', (e) => {
+        if (e.target === miniModal) {
+          miniModal.style.display = 'none';
+          console.log('Mini modal closed via background click');
+        }
+      });
+    } else {
+      console.error('Mini modal not found');
+    }
+
+    if (saveStoryBtn) {
+      saveStoryBtn.addEventListener('click', () => {
+        saveStoryBtn.classList.toggle('saved');
+        alert(saveStoryBtn.classList.contains('saved') ? 'Story saved!' : 'Story removed from saved.');
+        console.log('Save story button clicked:', saveStoryBtn.classList.contains('saved') ? 'Saved' : 'Unsaved');
+      });
+    } else {
+      console.error('Save story button not found');
+    }
+
+    if (shareStoryBtn) {
+      shareStoryBtn.addEventListener('click', () => {
+        alert('Story shared! (Simulated sharing to social media or email)');
+        console.log('Share story button clicked');
+      });
+    } else {
+      console.error('Share story button not found');
+    }
+
+    if (ctaBtn) {
+      ctaBtn.addEventListener('click', () => {
+        alert(`Taking action: ${ctaBtn.textContent} (Redirect to planning or info page)`);
+        console.log(`CTA button clicked: ${ctaBtn.textContent}`);
+      });
+    } else {
+      console.error('CTA button not found');
+    }
+
+    // Quiz Functionality
+    const quizOptions = document.querySelectorAll('.quiz-option');
+    const quizResult = document.querySelector('.quiz-result');
+    if (quizOptions.length > 0) {
+      quizOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          const answer = option.getAttribute('data-answer');
+          quizResult.textContent = answer === 'Mars' ? 'Correct! Mars is the Red Planet.' : 'Incorrect. The Red Planet is Mars.';
+          quizOptions.forEach(opt => opt.disabled = true);
+          console.log('Quiz answer selected:', answer);
+        });
+      });
+    } else {
+      console.error('No quiz options found');
+    }
+  </script>
+</body>
+</html>`
